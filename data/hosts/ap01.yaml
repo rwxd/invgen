@@ -4,8 +4,7 @@ metadata:
   environment: production
   location: home
   os: linux
-  services:
-    - "test"
+  services: []
   tags:
     - home
     - production
