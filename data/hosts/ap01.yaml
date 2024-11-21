@@ -1,0 +1,17 @@
+---
+metadata:
+  customer: home
+  environment: production
+  location: home
+  os: linux
+  services:
+    - "test"
+  tags:
+    - home
+    - production
+    - linux
+  groups:
+    - all
+    - home
+    - production
+    - linux
