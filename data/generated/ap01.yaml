@@ -20,3 +20,6 @@ metadata:
   groups:
   - home
 ansible_host: ap01.test.local
+password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  663736303132

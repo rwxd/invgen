@@ -12,6 +12,35 @@ except ImportError as e:
     from yaml import SafeLoader, SafeDumper
 
 
+class VaultPass(str):
+    """String subclass to represent vault-encrypted values"""
+
+    pass
+
+
+def ansible_vault_constructor(loader, node: yaml.nodes.ScalarNode) -> VaultPass:
+    """Construct a VaultPass object from a YAML node"""
+    if not isinstance(node, yaml.ScalarNode):
+        raise yaml.constructor.ConstructorError(
+            None, None, f"expected a scalar node, but found {node.id}", node.start_mark
+        )
+    return VaultPass(loader.construct_scalar(node))
+
+
+def ansible_vault_representer(dumper, data: VaultPass) -> yaml.nodes.ScalarNode:
+    """Represent a VaultPass object as a YAML scalar node"""
+    return dumper.represent_scalar(
+        "!vault",
+        str(data),
+        style="|",  # Use literal block style for multiline vault strings
+    )
+
+
+# Register the custom constructor and representer
+SafeLoader.add_constructor("!vault", ansible_vault_constructor)
+SafeDumper.add_representer(VaultPass, ansible_vault_representer)
+
+
 @lru_cache
 def load_yaml_cached(file: Path) -> dict:
     """Load a yaml file and cache the result"""
