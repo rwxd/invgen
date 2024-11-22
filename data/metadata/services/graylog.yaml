@@ -1,2 +1,2 @@
 ---
-test: pups
+service_graylog_server: true

@@ -1,18 +1,11 @@
 from pathlib import Path
 from dataclasses import dataclass
-from dagi.files import load_yaml_cached
+from dagi.files import load_yaml_cached, save_yaml
 from tempfile import TemporaryFile
 
 from dagi.metadata import build_metadata_vars, MetadataVars
 from dagi.logging import logger
 import yaml
-
-
-try:
-    from yaml import CSafeDumper as SafeDumper
-except ImportError as e:
-    logger.error(e)
-    from yaml import SafeDumper
 
 
 def generate_hosts(data_dir: Path):
@@ -22,45 +15,56 @@ def generate_hosts(data_dir: Path):
     for host in files:
         logger.info(f"Generating host {host.stem}")
         path = get_generated_host_path(data_dir, host.stem)
-        vars = get_vars_for_host(host, metadata)
+        content = generate_host_file(host, metadata)
+
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w") as f:
+            f.write(content)
 
 
-def get_vars_for_host(host: Path, metadata: MetadataVars) -> dict:
+def generate_host_file(host: Path, metadata: MetadataVars) -> str:
+    """Generate the content of a host file based on the provided metadata."""
     host_vars = load_yaml_cached(host)
     validate_host_vars(host.stem, host_vars)
 
-    def _dump(f, key, value):
-        yaml.dump(
-            {key: value},
-            f,
-            Dumper=SafeDumper,
-            indent=2,
-            allow_unicode=True,
-            default_flow_style=False,
-        )
-
     with TemporaryFile("w+") as f:
         previous_source: str | None = None
+
+        # Iterate over metadata items and dump them to the temporary file
         for key, value in host_vars["metadata"].items():
-            if isinstance(key, str):
+            if isinstance(value, str):
+                logger.debug(f"Processing metadata key: {key}, value: {value}")
                 source = f"{key}/{value}.yaml"
                 if metadata.lookup(key, host_vars["metadata"][key]):
                     if previous_source != source:
                         f.write(f"\n# {source}\n")
-                    _dump(f, key, value)
+                    save_yaml(f, metadata.lookup(key, host_vars["metadata"][key]))
                     previous_source = source
-            elif isinstance(key, list):
-                for item in key:
-                    source = f"{item}/{value}.yaml"
-                    if metadata.lookup(item, host_vars["metadata"][item]):
+            elif isinstance(value, list):
+                for item in value:
+                    logger.debug(f"Processing metadata key: {key}, value: {item}")
+                    source = f"{key}/{item}.yaml"
+                    if metadata.lookup(key, item):
                         if previous_source != source:
                             f.write(f"\n# {source}\n")
-                        _dump(f, key, value)
+                        save_yaml(f, metadata.lookup(key, item))
                         previous_source = source
             else:
                 raise ValueError(f"Invalid metadata type key: {key}")
 
-    return host_vars
+        # Dump the entire host_vars to the temporary file
+        source = f"hosts/{host.stem}.yaml"
+        f.write(f"\n# {source}\n")
+        save_yaml(f, host_vars)
+
+        # Test if generated file is valid yaml
+        try:
+            load_yaml_cached(f)
+        except yaml.YAMLError as e:
+            raise ValueError(f"Error reading generated file for host {host.stem}: {e}")
+
+        f.seek(0)
+        return f.read()
 
 
 def validate_host_vars(host: str, vars: dict):

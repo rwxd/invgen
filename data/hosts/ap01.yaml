@@ -4,13 +4,11 @@ metadata:
   environment: production
   location: home
   os: linux
-  services: []
-  tags:
-    - home
-    - production
-    - linux
+  services:
+    - graylog
+  tags: []
   groups:
-    - all
     - home
-    - production
-    - linux
+
+
+ansible_host: ap01.test.local

@@ -1,0 +1,22 @@
+
+# os/linux.yaml
+linux: yea
+
+# services/graylog.yaml
+service_graylog_server: true
+
+# groups/home.yaml
+home_var: content
+
+# hosts/ap01.yaml
+metadata:
+  customer: home
+  environment: production
+  location: home
+  os: linux
+  services:
+  - graylog
+  tags: []
+  groups:
+  - home
+ansible_host: ap01.test.local

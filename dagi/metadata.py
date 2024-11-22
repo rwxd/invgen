@@ -15,9 +15,23 @@ class MetadataVars:
     tags: dict[str, dict] = field(default_factory=dict)
 
     def lookup(self, metadata: str, key: str) -> dict:
-        sub_metadata = dict(getattr(self, metadata))
-        print(sub_metadata.get(key))
-        return sub_metadata.get(key, {})
+        """
+        Lookup metadata key in metadata vars
+
+        raises ValueError if metadata or key not foun
+        """
+
+        logger.debug(f"Looking up metadata {metadata} key {key}")
+        try:
+            sub_metadata = dict(getattr(self, metadata))
+        except AttributeError:
+            raise ValueError(f"Metadata {metadata} not found")
+
+        result = sub_metadata.get(key, {})
+        if not result:
+            logger.warning(f"Metadata {metadata} key {key} not found")
+
+        return result
 
 
 def build_metadata_vars(data_dir: Path) -> MetadataVars:
