@@ -1,4 +1,4 @@
-from dagi.cmd import app
+from invgen.cmd import app
 
 
 def main():

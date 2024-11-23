@@ -1,5 +1,5 @@
 from io import TextIOWrapper
-from dagi.logging import logger
+from invgen.logging import logger
 from pathlib import Path
 import yaml
 from functools import lru_cache

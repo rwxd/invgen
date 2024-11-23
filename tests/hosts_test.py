@@ -1,6 +1,6 @@
-from dagi.metadata import MetadataVars
+from invgen.metadata import MetadataVars
 from tempfile import NamedTemporaryFile
-from dagi.hosts import generate_host_file
+from invgen.hosts import generate_host_file
 from pathlib import Path
 import yaml
 

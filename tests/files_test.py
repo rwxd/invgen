@@ -1,4 +1,4 @@
-from dagi.files import save_yaml, load_yaml
+from invgen.files import save_yaml, load_yaml
 from tempfile import TemporaryFile
 
 

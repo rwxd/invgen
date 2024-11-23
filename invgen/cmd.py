@@ -1,15 +1,17 @@
 import typer
 from pathlib import Path
 
-from dagi.logging import init_logger
-from dagi.hosts import generate_hosts
+from invgen.logging import init_logger
+from invgen.hosts import generate_hosts
 
 app = typer.Typer()
 
 
 @app.command()
 def generate(
-    source: Path = Path("data/"),
+    source: Path = typer.Option(
+        Path("data/"), envvar="DAGI_SOURCE", help="Source directory"
+    ),
     verbose: bool = False,
     debug: bool = False,
     help="Generate host files",

@@ -1,10 +1,10 @@
 from pathlib import Path
 from dataclasses import dataclass
-from dagi.files import load_yaml_cached, save_yaml
+from invgen.files import load_yaml_cached, save_yaml
 from tempfile import TemporaryFile
 
-from dagi.metadata import build_metadata_vars, MetadataVars
-from dagi.logging import logger
+from invgen.metadata import build_metadata_vars, MetadataVars
+from invgen.logging import logger
 import yaml
 
 

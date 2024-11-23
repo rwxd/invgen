@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger("dagi")
+logger = logging.getLogger("invgen")
 
 
 def init_logger(loglevel: str = "WARNING") -> None:

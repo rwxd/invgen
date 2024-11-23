@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from dagi.files import load_yaml_cached
-from dagi.logging import logger
+from invgen.files import load_yaml_cached
+from invgen.logging import logger
 
 
 @dataclass()
