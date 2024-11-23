@@ -1,0 +1,7 @@
+---
+metadata:
+    platform: {{ platform }}
+    provider: {{ provider }}
+    services: {{ services }}
+
+ansible_host: {{ name }}

@@ -41,7 +41,7 @@ metadata:
   my_custom_metadata: my_custom_metadata1
 ```
 
-Under [example/](./example/) you can find an example of how to use the dynamic inventory script.
+Under [example/](./example/) you can find an example of how to build an inventory.
 
 Jinja2 can be used inside of variables, because it is parsed by Ansible at runtime.
 
@@ -106,4 +106,23 @@ ansible-playbook -i $(which invgen-ansible) playbook.yaml
   |  |--ap01.test.local
   |--@tags_selinux-deactivated:
   |  |--ap01.test.local
+```
+
+### Templates
+
+It is possible to use Jinja2 templates to generate host files.
+
+```yaml
+---
+metadata:
+    platform: {{ platform }}
+    provider: {{ provider }}
+    services: {{ services }}
+
+ansible_host: {{ name }}
+```
+
+```bash
+## Host
+invgen new host -t example/templates/host.yaml -d example/hosts --name "ap02.test.local" -o "platform=raspberry-pi-4 provider=self-hosted services=pihole,dnsmasq"
 ```
