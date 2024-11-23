@@ -67,25 +67,6 @@ def generate_host_file(host: Path, metadata: MetadataVars) -> str:
         return f.read()
 
 
-def validate_host_vars(host: str, vars: dict):
-    if not vars.get("metadata"):
-        raise ValueError(f"Metadata not found for host {host}")
-    if "customer" not in vars.get("metadata"):
-        raise ValueError(f"Customer metadata not found for host {host}")
-    if "os" not in vars.get("metadata"):
-        raise ValueError(f"OS metadata not found for host {host}")
-    if "environment" not in vars.get("metadata"):
-        raise ValueError(f"Environment metadata not found for host {host}")
-    if "location" not in vars.get("metadata"):
-        raise ValueError(f"Location metadata not found for host {host}")
-    if "services" not in vars.get("metadata"):
-        raise ValueError(f"Services metadata not found for host {host}")
-    if "groups" not in vars.get("metadata"):
-        raise ValueError(f"Groups metadata not found for host {host}")
-    if "tags" not in vars.get("metadata"):
-        raise ValueError(f"Tags metadata not found for host {host}")
-
-
 def get_generated_host_path(base_dir: Path, host: str) -> Path:
     return base_dir.joinpath(f"generated/{host}.yaml")
 

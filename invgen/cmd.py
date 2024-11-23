@@ -1,7 +1,7 @@
 import typer
 from pathlib import Path
 
-from invgen.logging import init_logger
+from invgen.logging import init_logger, logger
 from invgen.hosts import generate_hosts
 
 app = typer.Typer()
@@ -23,5 +23,5 @@ def generate(
     else:
         init_logger()
 
-    print(source.absolute())
+    logger.info(f"Generating host files from {source}")
     generate_hosts(source)
