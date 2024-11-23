@@ -1,5 +1,5 @@
 from pathlib import Path
-from invgen.files import load_yaml_cached
+from invgen.files import load_yaml
 from invgen.logging import logger
 
 
@@ -52,5 +52,5 @@ def build_metadata_vars(data_dir: Path) -> MetadataVars:
         if subdir.is_dir():
             vars.add_metadata(subdir.name)
             for file in subdir.rglob("*.yaml"):
-                vars.set_vars(subdir.name, file.stem, load_yaml_cached(file))
+                vars.set_vars(subdir.name, file.stem, load_yaml(file))
     return vars

@@ -41,7 +41,7 @@ metadata:
   my_custom_metadata: my_custom_metadata1
 ```
 
-Under [./example/](./example/) you can find an example of how to use the dynamic inventory script.
+Under [example/](./example/) you can find an example of how to use the dynamic inventory script.
 
 Jinja2 can be used inside of variables, because it is parsed by Ansible at runtime.
 
@@ -69,10 +69,41 @@ network_interfaces:
 
 Install with `pip install -U invgen` or `uv tool install -U invgen`.
 
+### Generate Inventory
+
 ```bash
 # set the environment variable INVGEN_SOURCE to the path of the inventory directory
 export INVGEN_SOURCE="$PWD/example/"
 
 # generate the host files
 invgen generate --verbose
+```
+
+### Ansible
+
+```bash
+# set the environment variable INVGEN_SOURCE to the path of the inventory directory
+export INVGEN_SOURCE="$PWD/example/"
+
+# run playbook with the inventory
+ansible-playbook -i $(which invgen-ansible) playbook.yaml
+
+# explore the inventory
+❯ ansible-inventory -i $(which invgen-ansible) --graph
+ [ERROR]: 2024-11-23 19:22:29,537 - INFO - inventory - Generating inventory from /home/fwrage/dev/invgen/example
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+@all:
+  |--@ungrouped:
+  |--@environment_production:
+  |  |--ap01.test.local
+  |--@provider_self-hosted:
+  |  |--ap01.test.local
+  |--@hardware_raspberry-pi-4:
+  |  |--ap01.test.local
+  |--@os_rhel-9:
+  |  |--ap01.test.local
+  |--@services_podman-rootless:
+  |  |--ap01.test.local
+  |--@tags_selinux-deactivated:
+  |  |--ap01.test.local
 ```

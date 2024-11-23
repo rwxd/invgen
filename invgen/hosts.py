@@ -1,11 +1,12 @@
-from pathlib import Path
 from dataclasses import dataclass
-from invgen.files import load_yaml_cached, save_yaml
+from pathlib import Path
 from tempfile import TemporaryFile
 
-from invgen.metadata import build_metadata_vars, MetadataVars
-from invgen.logging import logger
 import yaml
+
+from invgen.files import load_yaml, load_yaml_cached, save_yaml
+from invgen.logging import logger
+from invgen.metadata import MetadataVars, build_metadata_vars
 
 
 def generate_hosts(data_dir: Path):
@@ -95,18 +96,14 @@ def get_all_host_files(base_path: Path) -> list[Path]:
 
 @dataclass
 class GeneratedHost:
+    """Represents a generated host file"""
+
     name: str
     vars: dict
 
 
-def get_all_generated_hosts_files(base_path: Path) -> list[Path]:
-    files = base_path.joinpath("generated/").rglob("*.yaml")
-    return [f for f in files if f.is_file()]
-
-
-def get_all_generated_hosts(base_path: Path = Path().cwd()):
-    hosts = []
-    for file in get_all_generated_hosts_files(base_path):
-        if file.is_file():
-            hosts.append(GeneratedHost(name=file.stem, vars=load_yaml_cached(file)))
-    return hosts
+def get_all_generated_hosts(base_path: Path) -> list[GeneratedHost]:
+    host_files = base_path.joinpath("generated/").rglob("*.yaml")
+    return [
+        GeneratedHost(name=f.stem, vars=load_yaml(f)) for f in host_files if f.is_file()
+    ]

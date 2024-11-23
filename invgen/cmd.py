@@ -1,20 +1,21 @@
 import typer
 from pathlib import Path
 
-from invgen.logging import init_logger, logger
+from invgen.logging import init_logger
 from invgen.hosts import generate_hosts
+from invgen.inventory import inventory_app
 
 app = typer.Typer()
+app.add_typer(inventory_app, name="inventory")
 
 
 @app.command()
 def generate(
     source: Path = typer.Option(
-        Path("data/"), envvar="INVGEN_SOURCE", help="Source directory"
+        Path().cwd(), envvar="INVGEN_SOURCE", help="Source directory"
     ),
     verbose: bool = False,
     debug: bool = False,
-    help="Generate host files",
 ):
     if verbose:
         init_logger("INFO")
@@ -23,5 +24,6 @@ def generate(
     else:
         init_logger()
 
-    logger.info(f"Generating host files from {source}")
+    typer.echo(f"=> Generating hosts from {source}/hosts/")
     generate_hosts(source)
+    typer.echo(f"=> Done! Generated hosts in {source}/generated/")

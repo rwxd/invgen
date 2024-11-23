@@ -1,6 +1,6 @@
 [project]
 name = "invgen"
-version = "0.3.0"
+version = "0.4.0"
 description = "Dynamic Ansible Inventory Generator"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -8,6 +8,7 @@ dependencies = ["pyyaml>=6.0.2", "typer>=0.13.1", "uv>=0.5.4"]
 
 [project.scripts]
 invgen = "invgen.cmd:app"
+invgen-ansible = "invgen.inventory:inventory_app"
 
 [tool.setuptools]
 packages = ["invgen"]
