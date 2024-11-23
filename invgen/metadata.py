@@ -27,7 +27,7 @@ class MetadataVars:
         raises ValueError if metadata or key not found
         """
 
-        logger.debug(f"Looking up metadata {metadata} key {key}")
+        logger.debug(f"Looking up metadata {metadata}/{key}")
         try:
             sub_metadata = dict(getattr(self, metadata))
         except AttributeError:
@@ -37,7 +37,10 @@ class MetadataVars:
 
         result = sub_metadata.get(key, {})
         if not result:
-            logger.warning(f"Metadata {metadata} key {key} not found")
+            logger.warning(
+                f"Metadata {metadata}/{key} not found. "
+                f'Did you forget to add "{key}.yaml" to "metadata/{metadata}/"?'
+            )
 
         return result
 

@@ -32,7 +32,7 @@ def generate_host_file(host: Path, metadata: MetadataVars) -> str:
         # Iterate over metadata items and dump them to the temporary file
         for key, value in host_vars["metadata"].items():
             if isinstance(value, str):
-                logger.debug(f"Processing metadata key: {key}, value: {value}")
+                logger.debug(f"Processing metadata {key}/{value}")
                 source = f"{key}/{value}.yaml"
                 if metadata.lookup(key, host_vars["metadata"][key]):
                     if previous_source != source:
@@ -41,7 +41,7 @@ def generate_host_file(host: Path, metadata: MetadataVars) -> str:
                     previous_source = source
             elif isinstance(value, list):
                 for item in value:
-                    logger.debug(f"Processing metadata key: {key}, value: {item}")
+                    logger.debug(f"Processing metadata {key}/{item}")
                     source = f"{key}/{item}.yaml"
                     if metadata.lookup(key, item):
                         if previous_source != source:
