@@ -25,7 +25,6 @@ def generate_hosts(data_dir: Path):
 def generate_host_file(host: Path, metadata: MetadataVars) -> str:
     """Generate the content of a host file based on the provided metadata."""
     host_vars = load_yaml_cached(host)
-    validate_host_vars(host.stem, host_vars)
 
     with TemporaryFile("w+") as f:
         previous_source: str | None = None
