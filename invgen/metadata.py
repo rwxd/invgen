@@ -11,6 +11,9 @@ class MetadataVars:
         logger.info(f"Adding metadata type {name}")
         self._metadata[name] = {}
 
+    def set_vars(self, metadata_type: str, name: str, vars: dict):
+        self._metadata[metadata_type][name] = vars
+
     def __repr__(self) -> str:
         return f"MetadataVars({self._metadata})"
 
@@ -47,5 +50,5 @@ def build_metadata_vars(data_dir: Path) -> MetadataVars:
         if subdir.is_dir():
             vars.add_metadata(subdir.name)
             for file in subdir.rglob("*.yaml"):
-                vars._metadata[subdir.name][file.stem] = load_yaml_cached(file)
+                vars.set_vars(subdir.name, file.stem, load_yaml_cached(file))
     return vars

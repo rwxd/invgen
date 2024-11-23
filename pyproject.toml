@@ -1,6 +1,6 @@
 [project]
 name = "invgen"
-version = "0.2.1"
+version = "0.2.2"
 description = "Dynamic Ansible Inventory Generator"
 readme = "README.md"
 requires-python = ">=3.11"

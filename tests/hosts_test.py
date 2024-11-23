@@ -6,15 +6,35 @@ import yaml
 
 
 def test_generate_host_file():
-    metadata = MetadataVars(
-        groups={"group1": {"group_var": "content"}},
-        tags={"tag1": {"tag_var": "content"}},
-        services={"service1": {"service_var": "content"}},
-        customer={"customer1": {"customer_var": "content"}},
-        os={"os1": {"os_var": "content"}},
-        environment={"environment1": {"environment_var": "content"}},
-        location={"location1": {"location_var": "content"}},
-    )
+    metadata = MetadataVars()
+    items = {
+        "customer": {
+            "customer1": {"customer_var": "content"},
+        },
+        "environment": {
+            "environment1": {"environment_var": "content"},
+        },
+        "groups": {
+            "group1": {"group_var": "content"},
+        },
+        "location": {
+            "location1": {"location_var": "content"},
+        },
+        "os": {
+            "os1": {"os_var": "content"},
+        },
+        "services": {
+            "service1": {"service_var": "content"},
+        },
+        "tags": {
+            "tag1": {"tag_var": "content"},
+        },
+    }
+
+    for key, value in items.items():
+        metadata.add_metadata(key)
+        for name, vars in value.items():
+            metadata.set_vars(key, name, vars)
 
     host_vars = {
         "metadata": {
