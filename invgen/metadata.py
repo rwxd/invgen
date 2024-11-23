@@ -28,7 +28,9 @@ class MetadataVars:
         try:
             sub_metadata = dict(getattr(self, metadata))
         except AttributeError:
-            raise ValueError(f"Metadata type {metadata} not found")
+            raise ValueError(
+                f'Metadata type "{metadata}" not found. Consider adding a directory at "metadata/{metadata}"'
+            )
 
         result = sub_metadata.get(key, {})
         if not result:
