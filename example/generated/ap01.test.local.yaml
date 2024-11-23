@@ -1,0 +1,62 @@
+# hardware/raspberry-pi-4
+swap:
+  enabled: false
+  size: 2G
+
+# os/rhel-9
+firewall_rules:
+- service: ssh
+  state: enabled
+- service: http
+  state: enabled
+- service: https
+  state: enabled
+
+# tags/selinux-deactivated
+selinux_state: permissive
+
+# os/rhel-9
+default_services:
+- name: firewalld
+  state: started
+  enabled: true
+- name: sshd
+  state: started
+  enabled: true
+default_packages:
+- vim
+- curl
+- wget
+- iotop
+
+# services/podman-rootless
+service_podman: true
+service_podman_rootless: true
+service_podman_rootless_username: podman
+service_podman_rootless_user_id: 42069
+
+# hosts/ap01.test.local
+metadata:
+  environment: production
+  provider: self-hosted
+  hardware: raspberry-pi-4
+  os: rhel-9
+  services:
+  - podman-rootless
+  tags:
+  - selinux-deactivated
+ansible_host: ap01.test.local
+hostname: ap01
+password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  663736303132
+network_interfaces:
+- name: eth0
+  type: ethernet
+  state: up
+  ip: 192.168.1.100
+  netmask: 255.255.255.0
+  gateway: 192.168.1.1
+  dns:
+  - 8.8.8.8
+  - 8.8.4.4

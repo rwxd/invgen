@@ -1,0 +1,30 @@
+---
+metadata:
+  environment: production
+  provider: self-hosted
+  hardware: raspberry-pi-4
+  os: rhel-9
+  services:
+    - podman-rootless
+  tags:
+    - selinux-deactivated
+
+
+ansible_host: ap01.test.local
+hostname: ap01
+
+password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  663736303132
+
+
+network_interfaces:
+  - name: eth0
+    type: ethernet
+    state: up
+    ip: 192.168.1.100
+    netmask: 255.255.255.0
+    gateway: 192.168.1.1
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4

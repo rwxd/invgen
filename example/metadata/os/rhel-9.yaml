@@ -1,0 +1,24 @@
+---
+firewall_rules:
+  - service: ssh
+    state: enabled
+  - service: http
+    state: enabled
+  - service: https
+    state: enabled
+
+selinux_state: enforcing
+
+default_services:
+  - name: firewalld
+    state: started
+    enabled: true
+  - name: sshd
+    state: started
+    enabled: true
+
+default_packages:
+  - vim
+  - curl
+  - wget
+  - iotop

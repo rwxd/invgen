@@ -35,14 +35,13 @@ class MetadataVars:
                 f'Metadata type "{metadata}" not found. Consider adding a directory at "metadata/{metadata}"'
             )
 
-        result = sub_metadata.get(key, {})
-        if not result:
+        if key not in sub_metadata:
             logger.warning(
                 f"Metadata {metadata}/{key} not found. "
                 f'Did you forget to add "{key}.yaml" to "metadata/{metadata}/"?'
             )
 
-        return result
+        return sub_metadata.get(key, {})
 
 
 def build_metadata_vars(data_dir: Path) -> MetadataVars:

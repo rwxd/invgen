@@ -10,7 +10,7 @@ app = typer.Typer()
 @app.command()
 def generate(
     source: Path = typer.Option(
-        Path("data/"), envvar="DAGI_SOURCE", help="Source directory"
+        Path("data/"), envvar="INVGEN_SOURCE", help="Source directory"
     ),
     verbose: bool = False,
     debug: bool = False,

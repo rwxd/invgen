@@ -1,0 +1,6 @@
+---
+service_podman: true
+service_podman_rootless: true
+
+service_podman_rootless_username: "podman"
+service_podman_rootless_user_id: 42069

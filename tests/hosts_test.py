@@ -9,7 +9,10 @@ def test_generate_host_file():
     metadata = MetadataVars()
     items = {
         "customer": {
-            "customer1": {"customer_var": "content"},
+            "customer1": {
+                "customer_var": "content",
+                "service_var": "content-from-customer",
+            },
         },
         "environment": {
             "environment1": {"environment_var": "content"},
@@ -56,29 +59,28 @@ def test_generate_host_file():
         generated = generate_host_file(Path(f.name), metadata)
         assert (
             generated
-            == f"""
-# customer/customer1.yaml
+            == f"""# customer/customer1
 customer_var: content
 
-# environment/environment1.yaml
-environment_var: content
-
-# groups/group1.yaml
-group_var: content
-
-# location/location1.yaml
-location_var: content
-
-# os/os1.yaml
-os_var: content
-
-# services/service1.yaml
+# services/service1
 service_var: content
 
-# tags/tag1.yaml
+# environment/environment1
+environment_var: content
+
+# groups/group1
+group_var: content
+
+# location/location1
+location_var: content
+
+# os/os1
+os_var: content
+
+# tags/tag1
 tag_var: content
 
-# hosts/{Path(f.name).stem}.yaml
+# hosts/{Path(f.name).stem}
 host_var1: content
 metadata:
   customer: customer1

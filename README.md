@@ -1,1 +1,78 @@
-# Dynamic Ansible Git Inventory
+# Dynamic Ansible Inventory
+
+This is a dynamic inventory script for Ansible that reads the inventory from a
+directory. A list of hosts is managed by the user. Each host has metadata that is used to gather variables.
+
+The structure of the inventory directory is as follows:
+
+```tree
+hosts/
+  host1.yaml
+  host2.yaml
+  host3.yaml
+generated/
+  host1.yaml
+  host2.yaml
+  host3.yaml
+metadata/
+  tags/
+    tag1.yaml
+    tag2.yaml
+  platform/
+    platform1.yaml
+    platform2.yaml
+  my_custom_metadata/
+    my_custom_metadata1.yaml
+    my_custom_metadata2.yaml
+```
+
+The `hosts` directory contains host files that define the hosts.
+
+The `generated` directory contains generated host files that are created by the script and used as an inventory.
+
+The `metadata` directory contains metadata files that can be used to give hosts variables.
+To use the metadata, the host file must have a `metadata` key that contains a list of metadata files.
+
+```yaml
+metadata:
+  tags:
+    - tag1
+  platform: platform1
+  my_custom_metadata: my_custom_metadata1
+```
+
+Under [./example/](./example/) you can find an example of how to use the dynamic inventory script.
+
+Jinja2 can be used inside of variables, because it is parsed by Ansible at runtime.
+
+```yaml
+domain_name: example.com
+hostname: ap01
+
+ansible_host: "{{ hostname }}.{{ domain_name }}"
+
+dns_servers:
+  - 1.1.1.1
+  - 8.8.8.8
+
+network_interfaces:
+  - name: eth0
+    type: ethernet
+    state: up
+    ip: 192.168.1.100
+    netmask: 255.255.255.0
+    gateway: 192.168.1.1
+    dns: "{{ dns_servers }}"
+```
+
+## Usage
+
+Install with `pip install -U invgen` or `uv tool install -U invgen`.
+
+```bash
+# set the environment variable INVGEN_SOURCE to the path of the inventory directory
+export INVGEN_SOURCE="$PWD/example/"
+
+# generate the host files
+invgen generate --verbose
+```
