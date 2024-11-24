@@ -47,7 +47,7 @@ jobs:
         run: uv venv && . .venv/bin/activate && uv sync --all-extras --dev
 
       - name: Run pytest
-        run: pytest -vv tests/
+        run: uv run pytest -vv tests/
 
   pypi:
     runs-on: ubuntu-latest
