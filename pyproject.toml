@@ -14,4 +14,4 @@ invgen-ansible = "invgen.inventory:inventory_app"
 packages = ["invgen"]
 
 [tool.uv]
-dev-dependencies = ["pytest>=8.3.3"]
+dev-dependencies = ["pre-commit>=4.0.1", "pytest>=8.3.3"]
