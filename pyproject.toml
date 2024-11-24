@@ -4,7 +4,7 @@ version = "0.5.0"
 description = "Dynamic Ansible Inventory Generator"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["jinja2", "pyyaml>=6.0.2", "typer>=0.13.1", "uv>=0.5.4"]
+dependencies = ["jinja2", "pyyaml>=6.0.2", "typer>=0.13.1"]
 
 [project.scripts]
 invgen = "invgen.cmd:app"
