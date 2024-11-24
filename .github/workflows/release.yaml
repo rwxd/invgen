@@ -22,7 +22,7 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Install python dependencies
-        run: uv venv && . venv/bin/activate && uv sync --all-extras --dev
+        run: uv venv && . .venv/bin/activate && uv sync --all-extras --dev
 
       - name: Run pre-commit
         run: pre-commit run --show-diff-on-failure --all-files
@@ -41,7 +41,7 @@ jobs:
         run: pwd && ls -la
 
       - name: Install python dependencies
-        run: uv venv && . venv/bin/activate && uv sync --all-extras --dev
+        run: uv venv && . .venv/bin/activate && uv sync --all-extras --dev
 
       - name: Run pytest
         run: pytest -vv tests/
@@ -59,7 +59,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install python dependencies
-        run: uv venv && . venv/bin/activate && uv sync --all-extras --dev
+        run: uv venv && . .venv/bin/activate && uv sync --all-extras --dev
 
       - name: Build package
         run: uv build
