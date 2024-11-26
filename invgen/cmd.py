@@ -5,6 +5,7 @@ from invgen.logging import init_logger
 from invgen.hosts import generate_hosts
 from invgen.inventory import inventory_app
 from invgen.templates import render_template
+from invgen.watcher import watch_for_changes
 
 app = typer.Typer()
 app_new = typer.Typer()
@@ -19,6 +20,7 @@ def generate(
     ),
     verbose: bool = False,
     debug: bool = False,
+    watch: bool = typer.Option(False, "-w", "--watch", help="Watch for changes"),
 ):
     if verbose:
         init_logger("INFO")
@@ -30,6 +32,9 @@ def generate(
     typer.echo(f"=> Generating hosts from {source}/hosts/")
     generate_hosts(source)
     typer.echo(f"=> Done! Generated hosts in {source}/generated/")
+
+    if watch:
+        watch_for_changes(source)
 
 
 @app_new.command(name="host")

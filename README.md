@@ -77,6 +77,9 @@ export INVGEN_SOURCE="$PWD/example/"
 
 # generate the host files
 invgen generate --verbose
+
+# regenerate on file change
+invgen generate --verbose --watch
 ```
 
 ### Ansible
