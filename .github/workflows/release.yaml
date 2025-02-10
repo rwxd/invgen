@@ -65,13 +65,10 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Install python dependencies
-        run: uv venv && . .venv/bin/activate && uv sync --all-extras --dev
+        run: uv sync --all-extras --dev
 
       - name: Set release env, replace 'v' in tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" | sed "s/v//g" >> $GITHUB_ENV
-
-      - name: Replace version in pyproject
-        run: sed -i "s/version = .*/version = \"${GITHUB_REF#refs\/tags\/}\"/g" pyproject.toml
 
       - name: Replace version in pyproject.toml
         run: |
@@ -81,9 +78,7 @@ jobs:
         run: uv build
 
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish
 
   semantic-release:
     runs-on: ubuntu-latest
