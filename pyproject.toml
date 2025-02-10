@@ -5,7 +5,7 @@ description = "Dynamic Ansible Inventory Generator"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["jinja2", "pyyaml>=6.0.2", "typer>=0.13.1", "watchdog"]
-license = "MIT"
+license-files = ["LICENSE"]
 
 [project.scripts]
 invgen = "invgen.cmd:app"
