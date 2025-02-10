@@ -13,7 +13,7 @@ invgen-ansible = "invgen.inventory:inventory_app"
 
 [tool.setuptools]
 packages = ["invgen"]
-license-files = ["LICENSE"]
+license-files = []
 
 [tool.uv]
 dev-dependencies = ["pre-commit>=4.0.1", "pytest>=8.3.3"]
