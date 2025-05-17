@@ -19,7 +19,7 @@ jobs:
         run: pwd && ls -la
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
 
       - name: Install python dependencies
         run: uv venv && . .venv/bin/activate && uv sync --all-extras --dev
@@ -41,7 +41,7 @@ jobs:
         run: pwd && ls -la
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
 
       - name: Install python dependencies
         run: uv venv && . .venv/bin/activate && uv sync --all-extras --dev
@@ -65,7 +65,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
 
       - name: Install python dependencies
         run: uv sync --all-extras --dev
@@ -95,7 +95,7 @@ jobs:
           persist-credentials: false
 
       - id: generate_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.CICD_APP_ID }}
           private-key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
