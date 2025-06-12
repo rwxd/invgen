@@ -16,33 +16,33 @@ class RegenerateHandler(FileSystemEventHandler):
         self.pending_regeneration = False
         self.last_processed_time = 0
         self.debounce_time = 0.5  # seconds
-    
+
     def _should_process(self, event):
         # Skip events in the generated directory
         if "generated" in event.src_path:
             return False
-            
+
         # Only process yaml files
         if not event.src_path.endswith(".yaml") and not event.is_directory:
             return False
-            
+
         return True
-        
+
     def _schedule_regeneration(self, event):
         if not self._should_process(event):
             return
-            
+
         current_time = time()
         if current_time - self.last_processed_time < self.debounce_time:
             # If we're within the debounce period, just mark that we need to regenerate
             self.pending_regeneration = True
             return
-            
+
         # Otherwise, regenerate now
         self._regenerate(event)
         self.pending_regeneration = False
         self.last_processed_time = current_time
-        
+
     def _regenerate(self, event):
         print(f"=> File {event.event_type}: {event.src_path}")
         try:
@@ -60,7 +60,7 @@ class RegenerateHandler(FileSystemEventHandler):
 
     def on_deleted(self, event):
         self._schedule_regeneration(event)
-        
+
     def check_pending(self):
         """Check if there's a pending regeneration and process it if needed"""
         current_time = time()

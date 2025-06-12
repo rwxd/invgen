@@ -123,22 +123,22 @@ def new_metadata(
 ):
     metadata_dir = source.joinpath(f"metadata/{metadata_type}")
     metadata_dir.mkdir(parents=True, exist_ok=True)
-    
+
     output_path = metadata_dir.joinpath(f"{name}.yaml")
-    
+
     if output_path.exists():
         typer.echo(typer.style(f"=> Error: Metadata file {output_path} already exists", fg=typer.colors.RED))
         raise typer.Exit(1)
-    
+
     typer.echo(f"=> Creating new metadata {metadata_type}/{name}")
-    
+
     if template:
         kwargs = {"name": name, "type": metadata_type}
         if options:
             for option in options.split(" "):
                 key, value = option.split("=")
                 kwargs[key.strip()] = value.strip()
-        
+
         rendered = render_template(template, **kwargs)
         with open(output_path, "w") as f:
             f.write(rendered)
@@ -147,7 +147,7 @@ def new_metadata(
         with open(output_path, "w") as f:
             f.write("# Metadata file for {0}/{1}\n".format(metadata_type, name))
             f.write("---\n")
-    
+
     typer.echo(f"=> Done! Created new metadata in {output_path}")
 
 
@@ -159,26 +159,26 @@ def validate_hosts(
 ):
     """Validate all host files in the inventory"""
     init_logger("INFO")
-    
+
     host_files = get_all_host_files(source)
     errors = []
-    
+
     typer.echo(f"=> Validating {len(host_files)} host files")
-    
+
     for host_file in host_files:
         try:
             from invgen.files import load_yaml_cached
             host_data = load_yaml_cached(host_file)
-            
+
             # Check for required fields
             if "metadata" not in host_data:
                 errors.append(f"{host_file.name}: Missing 'metadata' section")
             elif not isinstance(host_data["metadata"], dict):
                 errors.append(f"{host_file.name}: 'metadata' must be a dictionary")
-                
+
         except Exception as e:
             errors.append(f"{host_file.name}: {str(e)}")
-    
+
     if errors:
         typer.echo(typer.style("=> Validation failed with errors:", fg=typer.colors.RED))
         for error in errors:
