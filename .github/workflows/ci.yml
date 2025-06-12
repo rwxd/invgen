@@ -90,7 +90,7 @@ jobs:
         if: matrix.python-version == '3.13'
         run: |
           uv pip install genbadge[coverage]
-          genbadge coverage -i coverage.xml -o coverage-badge.svg
+          uv run genbadge coverage -i coverage.xml -o coverage-badge.svg
 
       - name: Upload coverage badge artifact
         if: matrix.python-version == '3.13'
