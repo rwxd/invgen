@@ -4,14 +4,10 @@ name: CI
 on:
   push:
     branches:
-      - "*"
+      - "main"  # Only run on push to main
     tags-ignore:
       - "v*.*.*"  # Tags are handled by the release workflow
-  pull_request:
-    branches:
-      - "*"
-  schedule:
-    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight for cleanup
+  pull_request:  # Run on all PRs
 
 jobs:
   lint:
