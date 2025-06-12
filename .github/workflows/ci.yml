@@ -4,14 +4,10 @@ name: CI
 on:
   push:
     branches:
-      - "*"
+      - "main"  # Only run on push to main
     tags-ignore:
       - "v*.*.*"  # Tags are handled by the release workflow
-  pull_request:
-    branches:
-      - "*"
-  schedule:
-    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight for cleanup
+  pull_request:  # Run on all PRs
 
 jobs:
   lint:
@@ -89,8 +85,8 @@ jobs:
       - name: Generate coverage badge
         if: matrix.python-version == '3.13'
         run: |
-          pip install genbadge[coverage]
-          genbadge coverage -i coverage.xml -o coverage-badge.svg
+          uv pip install genbadge[coverage]
+          uv run genbadge coverage -i coverage.xml -o coverage-badge.svg
 
       - name: Upload coverage badge artifact
         if: matrix.python-version == '3.13'
@@ -110,20 +106,24 @@ jobs:
 
   post-test:
     name: Post-Test Actions
-    needs: test
+    needs: [test, lint]  # Now requires both test and lint jobs to succeed
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Build package
         run: |
-          pip install uv
           uv venv
           . .venv/bin/activate
           uv build
