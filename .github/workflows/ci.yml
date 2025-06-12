@@ -1,0 +1,152 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - "*"
+    tags-ignore:
+      - "v*.*.*"  # Tags are handled by the release workflow
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          . .venv/bin/activate
+          uv sync --all-extras --dev
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run pre-commit
+        run: |
+          . .venv/bin/activate
+          uv run pre-commit run --show-diff-on-failure --all-files
+        env:
+          SKIP: "no-commit-to-branch"
+
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          . .venv/bin/activate
+          uv sync --all-extras --dev
+          uv pip install pytest-cov
+
+      - name: Run tests with coverage
+        run: |
+          . .venv/bin/activate
+          uv run pytest --cov=invgen --cov-report=xml --cov-report=term tests/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+          flags: python-${{ matrix.python-version }}
+
+      - name: Upload coverage artifact
+        if: matrix.python-version == '3.13' && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 1
+
+  post-test:
+    name: Post-Test Actions
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: pip install genbadge[coverage]
+
+      - name: Generate coverage badge
+        run: genbadge coverage -i coverage.xml -o coverage-badge.svg
+
+      - id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CICD_APP_ID }}
+          private-key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+
+      - name: Commit and push badge
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'coverage-badge.svg'
+          message: 'Update coverage badge'
+          default_author: github_actions
+          github_token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Build package
+        run: |
+          pip install uv
+          uv venv
+          . .venv/bin/activate
+          uv build
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v3
+        env:
+          GITHUB_TOKEN: "${{ steps.generate_token.outputs.token }}"

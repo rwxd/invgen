@@ -16,4 +16,23 @@ packages = ["invgen"]
 license-files = []
 
 [tool.uv]
-dev-dependencies = ["pre-commit>=4.0.1", "pytest>=8.3.3"]
+dev-dependencies = ["pre-commit>=4.0.1", "pytest>=8.3.3", "pytest-cov>=4.1.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "*_test.py"
+python_functions = "test_*"
+
+[tool.coverage.run]
+source = ["invgen"]
+omit = ["tests/*", "**/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
