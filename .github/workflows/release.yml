@@ -38,17 +38,21 @@ jobs:
           . .venv/bin/activate
           uv run pytest --cov=invgen --cov-report=xml --cov-report=term tests/
 
-  publish:
-    name: Publish to PyPI
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+          flags: python-${{ matrix.python-version }}
 
+  build:
+    name: Build Package
+    needs: [test]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -70,7 +74,37 @@ jobs:
           . .venv/bin/activate
           uv build
 
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Publish package
         run: |
+          uv venv
           . .venv/bin/activate
           uv publish
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
