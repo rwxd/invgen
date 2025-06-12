@@ -89,7 +89,7 @@ jobs:
       - name: Generate coverage badge
         if: matrix.python-version == '3.13'
         run: |
-          pip install genbadge[coverage]
+          uv pip install genbadge[coverage]
           genbadge coverage -i coverage.xml -o coverage-badge.svg
 
       - name: Upload coverage badge artifact
@@ -110,20 +110,24 @@ jobs:
 
   post-test:
     name: Post-Test Actions
-    needs: test
+    needs: [test, lint]  # Now requires both test and lint jobs to succeed
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Build package
         run: |
-          pip install uv
           uv venv
           . .venv/bin/activate
           uv build
