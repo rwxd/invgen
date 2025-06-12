@@ -48,6 +48,11 @@ def build_metadata_vars(data_dir: Path) -> MetadataVars:
     vars = MetadataVars()
     logger.info("Getting metadata vars")
     metadata_dir = data_dir.joinpath("metadata")
+    
+    if not metadata_dir.exists():
+        logger.warning(f"Metadata directory {metadata_dir} does not exist")
+        return vars
+        
     for subdir in metadata_dir.iterdir():
         if subdir.is_dir():
             vars.add_metadata(subdir.name)

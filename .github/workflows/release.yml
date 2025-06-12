@@ -1,0 +1,43 @@
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  test-python-3-11:
+    name: Test Python 3.11
+    uses: ./.github/workflows/reusable-jobs.yml
+    with:
+      job-type: test
+      python-version: '3.11'
+
+  test-python-3-12:
+    name: Test Python 3.12
+    uses: ./.github/workflows/reusable-jobs.yml
+    with:
+      job-type: test
+      python-version: '3.12'
+
+  test-python-3-13:
+    name: Test Python 3.13
+    uses: ./.github/workflows/reusable-jobs.yml
+    with:
+      job-type: test
+      python-version: '3.13'
+
+  build:
+    name: Build Package
+    needs: [test-python-3-11, test-python-3-12, test-python-3-13]
+    uses: ./.github/workflows/reusable-jobs.yml
+    with:
+      job-type: build
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    uses: ./.github/workflows/reusable-jobs.yml
+    with:
+      job-type: publish

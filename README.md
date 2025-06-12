@@ -1,7 +1,11 @@
 # Dynamic Ansible Inventory
 
+[![codecov](https://codecov.io/gh/rwxd/invgen/branch/main/graph/badge.svg)](https://codecov.io/gh/rwxd/invgen)
+
 This is a dynamic inventory script for Ansible that reads the inventory from a
 directory. A list of hosts is managed by the user. Each host has metadata that is used to gather variables.
+
+## Directory Structure
 
 The structure of the inventory directory is as follows:
 
@@ -26,24 +30,28 @@ metadata/
     my_custom_metadata2.yaml
 ```
 
-The `hosts` directory contains host files that define the hosts.
+- The `hosts` directory contains host files that define the hosts.
+- The `generated` directory contains generated host files that are created by the script and used as an inventory.
+- The `metadata` directory contains metadata files that can be used to give hosts variables.
 
-The `generated` directory contains generated host files that are created by the script and used as an inventory.
+## Host Configuration
 
-The `metadata` directory contains metadata files that can be used to give hosts variables.
-To use the metadata, the host file must have a `metadata` key that contains a list of metadata files.
+To use the metadata, the host file must have a `metadata` key that contains a list of metadata files:
 
 ```yaml
 metadata:
   tags:
     - tag1
+    - tag2
   platform: platform1
   my_custom_metadata: my_custom_metadata1
 ```
 
 Under [example/](./example/) you can find an example of how to build an inventory.
 
-Jinja2 can be used inside of variables, because it is parsed by Ansible at runtime.
+## Variable Templating
+
+Jinja2 can be used inside of variables, because it is parsed by Ansible at runtime:
 
 ```yaml
 domain_name: example.com
@@ -65,9 +73,11 @@ network_interfaces:
     dns: "{{ dns_servers }}"
 ```
 
-## Usage
+## Installation
 
 Install with `pip install -U invgen` or `uv tool install -U invgen`.
+
+## Usage
 
 ### Generate Inventory
 
@@ -78,11 +88,31 @@ export INVGEN_SOURCE="$PWD/example/"
 # generate the host files
 invgen generate --verbose
 
+# clean and regenerate host files
+invgen generate --verbose --clean
+
 # regenerate on file change
 invgen generate --verbose --watch
 ```
 
-### Ansible
+### Create New Hosts and Metadata
+
+```bash
+# Create a new host from a template
+invgen new host -t example/templates/host.yaml -d example/hosts --name "ap02.test.local" -o "platform=raspberry-pi-4 provider=self-hosted services=pihole,dnsmasq"
+
+# Create a new metadata file
+invgen new metadata --metadata-type platform --name "raspberry-pi-5" -s example/
+```
+
+### Validate Inventory
+
+```bash
+# Validate all host files
+invgen validate hosts
+```
+
+### Use with Ansible
 
 ```bash
 # set the environment variable INVGEN_SOURCE to the path of the inventory directory
@@ -93,8 +123,6 @@ ansible-playbook -i $(which invgen-ansible) playbook.yaml
 
 # explore the inventory
 ❯ ansible-inventory -i $(which invgen-ansible) --graph
- [ERROR]: 2024-11-23 19:22:29,537 - INFO - inventory - Generating inventory from /home/fwrage/dev/invgen/example
-[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
 @all:
   |--@ungrouped:
   |--@environment_production:
@@ -111,9 +139,19 @@ ansible-playbook -i $(which invgen-ansible) playbook.yaml
   |  |--ap01.test.local
 ```
 
-### Templates
+## Variable Merging
 
-It is possible to use Jinja2 templates to generate host files.
+When multiple metadata sources define the same variable:
+
+- For dictionaries: Keys are merged with host-specific values taking precedence
+- For lists: Items are combined with duplicates removed
+- For scalar values: The last processed value (host-specific) takes precedence
+
+## Advanced Features
+
+### Templating
+
+You can use Jinja2 templates to generate host files:
 
 ```yaml
 ---
@@ -125,7 +163,10 @@ metadata:
 ansible_host: {{ name }}
 ```
 
+### Watching for Changes
+
+The `--watch` flag allows the tool to automatically regenerate the inventory when files change:
+
 ```bash
-## Host
-invgen new host -t example/templates/host.yaml -d example/hosts --name "ap02.test.local" -o "platform=raspberry-pi-4 provider=self-hosted services=pihole,dnsmasq"
+invgen generate --verbose --watch
 ```

@@ -1,0 +1,203 @@
+---
+name: Reusable Jobs
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        type: string
+        default: '3.13'
+      upload-coverage:
+        required: false
+        type: boolean
+        default: false
+      coverage-artifact-name:
+        required: false
+        type: string
+        default: coverage-report
+      additional-packages:
+        required: false
+        type: string
+        default: ''
+      job-type:
+        required: true
+        type: string
+        description: 'Type of job to run: lint, test, build, publish, coverage-badge'
+    secrets:
+      CICD_APP_ID:
+        required: false
+      CICD_APP_PRIVATE_KEY:
+        required: false
+
+jobs:
+  lint:
+    if: inputs.job-type == 'lint'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          . .venv/bin/activate
+          uv sync --all-extras --dev
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run pre-commit
+        run: |
+          . .venv/bin/activate
+          uv run pre-commit run --show-diff-on-failure --all-files
+        env:
+          SKIP: "no-commit-to-branch"
+
+  test:
+    if: inputs.job-type == 'test'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          . .venv/bin/activate
+          uv sync --all-extras --dev
+          uv pip install pytest-cov ${{ inputs.additional-packages }}
+
+      - name: Run tests with coverage
+        run: |
+          . .venv/bin/activate
+          uv run pytest --cov=invgen --cov-report=xml --cov-report=term tests/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+          flags: python-${{ inputs.python-version }}
+
+      - name: Upload coverage artifact
+        if: inputs.upload-coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.coverage-artifact-name }}
+          path: coverage.xml
+          retention-days: 1
+
+  build:
+    if: inputs.job-type == 'build'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build package
+        run: |
+          uv venv
+          . .venv/bin/activate
+          uv build
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  publish:
+    if: inputs.job-type == 'publish'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set release env, replace 'v' in tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" | sed "s/v//g" >> $GITHUB_ENV
+
+      - name: Replace version in pyproject.toml
+        run: |
+          sed -i 's/^version = "[^"]*"/version = "${{env.RELEASE_VERSION}}"/' pyproject.toml
+
+      - name: Publish package
+        run: |
+          uv venv
+          . .venv/bin/activate
+          uv publish
+
+  coverage-badge:
+    if: inputs.job-type == 'coverage-badge'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.coverage-artifact-name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install dependencies
+        run: pip install genbadge[coverage]
+
+      - name: Generate coverage badge
+        run: genbadge coverage -i coverage.xml -o coverage-badge.svg
+
+      - id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CICD_APP_ID }}
+          private-key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+
+      - name: Commit and push badge
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'coverage-badge.svg'
+          message: 'Update coverage badge'
+          default_author: github_actions
+          github_token: ${{ steps.generate_token.outputs.token }}
