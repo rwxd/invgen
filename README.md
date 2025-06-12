@@ -1,5 +1,6 @@
 # Dynamic Ansible Inventory
 
+[![CI](https://github.com/rwxd/invgen/actions/workflows/ci.yml/badge.svg)](https://github.com/rwxd/invgen/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/rwxd/invgen/branch/main/graph/badge.svg)](https://codecov.io/gh/rwxd/invgen)
 
 This is a dynamic inventory script for Ansible that reads the inventory from a
