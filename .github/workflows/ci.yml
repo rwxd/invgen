@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - "*"
-    tags:
-      - "v*.*.*"
+    tags-ignore:
+      - "v*.*.*"  # Tags are handled by the release workflow
   pull_request:
     branches:
       - "*"
@@ -55,17 +55,10 @@ jobs:
   build:
     name: Build Package
     needs: [lint, test-python-3-11, test-python-3-12, test-python-3-13]
+    if: github.event_name != 'pull_request'  # Skip build on PRs
     uses: ./.github/workflows/reusable-jobs.yml
     with:
       job-type: build
-
-  publish:
-    name: Publish to PyPI
-    needs: build
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    uses: ./.github/workflows/reusable-jobs.yml
-    with:
-      job-type: publish
 
   semantic-release:
     name: Semantic Release
