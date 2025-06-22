@@ -144,9 +144,13 @@ ansible-playbook -i $(which invgen-ansible) playbook.yaml
 
 When multiple metadata sources define the same variable:
 
-- For dictionaries: Keys are merged with host-specific values taking precedence
-- For lists: Items are combined with duplicates removed
-- For scalar values: The last processed value (host-specific) takes precedence
+- For scalar values (strings, numbers, booleans): The last processed value takes precedence
+- For dictionaries and lists: Later values completely replace earlier values
+- Host-specific values (defined directly in the host file) always take precedence over metadata values
+
+The order of precedence (from lowest to highest):
+1. Metadata files (processed in the order they appear in the host's metadata section)
+2. Host-specific values (defined directly in the host file)
 
 ## Advanced Features
 
